@@ -1,5 +1,9 @@
 #
-# Web based GUI for BBC chess engine
+# Web based GUI for the Lishex chess engine
+# AB + MCTS variants
+#
+# Forked from a GUI for the BBC chess engine
+# by Maksim Korzh
 #
 
 # packages
@@ -13,84 +17,31 @@ import io
 import random
 from flask import jsonify
 from flask import Response
-from flask_pymongo import PyMongo
 from datetime import datetime
 import json
+
+# Engine path (we can switch between AB / MCTS / etc.)
+ENGINE_PATH = r"./engine/lishex"
+
+engine = chess.engine.SimpleEngine.popen_uci(ENGINE_PATH)
 
 # create web app instance
 app = Flask(__name__)
 
-# probe book move
-def probe_book(pgn):
-    # open book file
-    with open('./engine/book.txt') as f:
-        # read book games
-        book = f.read()
-
-        # init board        
-        board = chess.Board()
-        
-        # define response moves
-        response_moves = []
-
-        # loop over book lines
-        for line in book.split('\n')[0:-1]:
-            # define variation
-            variation = []
-            
-            # loop over line moves
-            for move in line.split():
-                variation.append(chess.Move.from_uci(move))
-            
-            # parse variation to SAN
-            san = board.variation_san(variation)
-            
-            # match book line line
-            if pgn in san:
-                try:
-                    # black move
-                    if san.split(pgn)[-1].split()[0][0].isdigit():
-                        response_moves.append(san.split(pgn)[-1].split()[1])
-                    
-                    # white move
-                    else:
-                        response_moves.append(san.split(pgn)[-1].split()[0])
-                
-                except:
-                    pass
-            
-            # engine makes first move
-            if pgn == '':
-                response_moves.append(san.split('1. ')[-1].split()[0])
-
-        # return random response move
-        if len(response_moves):
-            print('BOOK MOVE:', random.choice(response_moves))
-            return random.choice(response_moves)
-        
-        else:
-            return 0
-
 # root(index) route
 @app.route('/')
 def root():
-    return render_template('bbc.html')
+    return render_template('index.html')
 
 # make move API
 @app.route('/make_move', methods=['POST'])
 def make_move():
+    global engine
     # extract FEN string from HTTP POST request body
     pgn = request.form.get('pgn')
     
-    # probe opening book
-    if probe_book(pgn):
-        return {
-            'score': 'book move',
-            'best_move': probe_book(pgn)
-        }
-
     # read game moves from PGN
-    game = chess.pgn.read_game(io.StringIO(pgn))    
+    game = chess.pgn.read_game(io.StringIO(pgn))
     
     # init board
     board = game.board()
@@ -101,7 +52,8 @@ def make_move():
         board.push(move)
     
     # create chess engine instance
-    engine = chess.engine.SimpleEngine.popen_uci('./engine/bbc_1.4')
+    if not engine:
+        engine = chess.engine.SimpleEngine.popen_uci(ENGINE)
     
     # extract fixed depth value
     fixed_depth = request.form.get('fixed_depth')
@@ -133,7 +85,7 @@ def make_move():
             info = {}
     
     # terminate engine process
-    engine.quit()
+    # engine.quit()
     
     try:
         # extract best move from PV
@@ -141,8 +93,6 @@ def make_move():
 
         # update internal python chess board state
         board.push(best_move)
-        
-       
         
         # get best score
         try:
