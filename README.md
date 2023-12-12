@@ -1,12 +1,12 @@
 # Web based GUI for UCI chess engine
-A simple web based GUI to play versus my engine BBC. You can replace BBC with whatever UCI chess engine and get the same result!
+A simple web based GUI to play versus Lishex. 
+Fork of original Flask web GUI by Maksim Korzh.
 
 # PLAY ONLINE
-[![IMAGE ALT TEXT HERE](https://github.com/maksimKorzh/uci-gui/blob/main/gui.png)](https://maksimkorzh.pythonanywhere.com)
+[![IMAGE ALT TEXT HERE](gui.png)](https://michalkurek.com/lishex)
 
 # Features
  - online play
- - opening book in text format (from TSCP chess engine)
  - flip board
  - force computer move
  - fixed time mode
@@ -26,6 +26,6 @@ A simple web based GUI to play versus my engine BBC. You can replace BBC with wh
   - install python chess via "pip install python-chess"
   - clone repo, cd into /src and run command "python app.py"
   - open browser, navigate to "localhost:5000"
-
-# YouTube tutorials
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/_0uKZbHWVKM/0.jpg)](https://www.youtube.com/watch?v=_0uKZbHWVKM&list=PLmN0neTso3Jz-6--Mj51Hc3jiLhkQm0DB)
+  
+# Credit
+Huge thanks to [Maksim Korzh](https://github.com/maksimKorzh), whose repository this is a fork and modification of.
